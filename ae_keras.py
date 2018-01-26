@@ -5,17 +5,20 @@ from keras.preprocessing import text, sequence
 
 
 
-def ae(timesteps, input_dim, embed_max_features, embed_size):
-    inputs = Input(shape=(timesteps, input_dim))
-    embed = Embedding((embed_max_features, embed_size))(inputs)
+def AE(timesteps = 10, input_dim = 50, embed_max_features = 50000, embed_size = 128, latent_dim=30):
+    inputs = Input(shape=(input_dim,))
+    embed = Embedding(embed_max_features, embed_size)(inputs)
     encoded = LSTM(latent_dim)(embed)
-    
+
     decoded = RepeatVector(timesteps)(encoded)
     decoded = LSTM(input_dim, return_sequences=True)(decoded)
-    embed_decoded = Embedding((embed_max_features, embed_size))(decoded)
-    decoded = Dense(input_dim)(embed_decoded)
+    #embed_decoded = Embedding(embed_max_features, embed_size)(decoded)
+    #embed_flatten = Flatten()(embed_decoded)
+    embed_flatten = Flatten()(embed)
+    decoded = Dense(input_dim)(inputs)
 
     sequence_autoencoder = Model(inputs, decoded)
     sequence_autoencoder.compile(loss='mae', optimizer='adam')#, metrics=['accuracy'])
     #encoder = Model(inputs, encoded)
     return sequence_autoencoder
+
